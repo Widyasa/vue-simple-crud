@@ -30,6 +30,7 @@
 <script>
 
 import axios from "axios";
+import {useRouter} from "vue-router";
 
 export default {
   name: "TeamEdit",
@@ -61,8 +62,9 @@ export default {
     editTeam() {
       axios.put(`http://127.0.0.1:8000/api/team/members/edit/${this.teamId}`, this.model.team)
           .then(({data})=>{
-            console.log(data.data);
+            // console.log(data.data);
             this.model.team = data.data
+            this.$router.push({name: "teams"})
           })
     },
     saveTeam() {

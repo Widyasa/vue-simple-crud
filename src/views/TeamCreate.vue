@@ -50,12 +50,13 @@ export default {
       axios.post('http://127.0.0.1:8000/api/team/members', this.model.team)
           .then(({data}) => {
             console.log(data.data)
-            alert(data.message);
+            // alert(data.message);
 
             this.model.team = {
               member_name:'',
               role:''
             }
+            this.$router.push({name:'teams'})
           })
           .catch( function (error) {
                 if (error.response) {
@@ -70,7 +71,10 @@ export default {
                 console.log(error.config);
               }
           )
-    }
+    },
+    // validateForm() {
+    //
+    // }
   }
 }
 </script>
