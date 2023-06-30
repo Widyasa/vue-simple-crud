@@ -17,6 +17,7 @@
             <th>Id</th>
             <th>Name</th>
             <th>Role</th>
+            <th>Image</th>
             <th>Actions</th>
           </tr> 
           </thead>
@@ -25,6 +26,7 @@
             <td>{{index+1}}</td>
             <td>{{team.member_name}}</td>
             <td>{{team.role}}</td>
+            <td><img :src="'http://127.0.0.1:8000/'+team.member_img" alt="" class="w-25"></td>
             <td class="d-flex flex-row gap-3">
 <!--              <router-link :to="{path: '/teams/edit/'+teams.id}" class="btn btn-warning text-white ">Update</router-link>-->
               <button type="button" @click="showModalEdit(team)" class="btn btn-warning text-white ">Update</button>
@@ -64,6 +66,19 @@
                   <div class="mb-3">
                     <label for="">Role</label>
                     <input type="text" v-model="model.team.role" class="form-control">
+                  </div>
+                  <div class="mb-3">
+                    <label for="">image</label>
+                    <input type="file" @change="onChange" class="form-control">
+                    <div v-if="model.team.member_img" v-show="!modalStatus">
+                      <img v-bind:src="imgPreview" width="100" height="100"/>
+                    </div>
+                    <div class="" v-if="model.team.member_img" v-show="modalStatus">
+                      <img :src="
+                        model.team.image_url ??
+                        'http://127.0.0.1:8000/' + model.team.member_img" alt="" width="100" height="100">
+                    </div>
+
                   </div>
                 </div>
               </div>
@@ -129,9 +144,12 @@ import { ref } from "vue";
         model:{
           team:{
             member_name:'',
-            role:''
+            role:'',
+            member_img:'',
+            image_url:''
           }
         },
+        imgPreview:null,
         idTeam:ref('')
         // counterStart:1
       }
@@ -163,19 +181,37 @@ import { ref } from "vue";
         $("#modal").modal("show");
         this.model.team.member_name = team.member_name;
         this.model.team.role = team.role
+        this.model.team.member_img = team.member_img
+        this.model.team.image_url = team.image_url
         this.model.team.id = team.id
       },
       showModalDelete(teamId){ 
         $("#modalDelete").modal("show")
         this.idTeam = teamId 
       },
+      onChange(e)
+      {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+          // The field to send on backend and apply validations
+          this.model.team.member_img = reader.result;
+          // The field to display here
+          this.model.team.image_url = reader.result;
+          this.imgPreview = reader.result;
+          e.target.value = "";
+        };
+        reader.readAsDataURL(file);
+      },
       saveTeam() {
-        let myThis = this; 
-        axios.post('http://127.0.0.1:8000/api/team/members', this.model.team)
+        let myThis = this;
+        axios.post('http://127.0.0.1:8000/api/team/members',this.model.team)
             .then(({data}) => {
               this.model.team = {
                 member_name:'',
-                role:''
+                role:'',
+                member_img: '',
+                image_url: '',
               }
               this.refreshTable()
               this.message = data.meta.message
